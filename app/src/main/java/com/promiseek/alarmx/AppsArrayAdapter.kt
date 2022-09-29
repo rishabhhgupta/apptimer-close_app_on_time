@@ -9,17 +9,17 @@ import android.view.ViewGroup
 import android.widget.*
 import com.promiseek.alarmx.Timer_Setting.Companion.selectedAppsListView
 
-class AppsArrayAdapter(var arrayListOfApps:ArrayList<AppPogo>, var context: Context): BaseAdapter() {
+class AppsArrayAdapter(var arrayListOfApps:ArrayList<AppPogo>, var context: Context,var selectedApp:ArrayList<String>): BaseAdapter() {
     override fun getCount(): Int {
         return arrayListOfApps.size
     }
 
     override fun getItem(p0: Int): Any {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getItemId(p0: Int): Long {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun getView(i: Int, p1: View?, p2: ViewGroup?): View {
@@ -36,6 +36,17 @@ class AppsArrayAdapter(var arrayListOfApps:ArrayList<AppPogo>, var context: Cont
         appType.text = arrayListOfApps.get(i).appType
 //        switch.isChecked =
         // To listen for a switch's checked/unchecked state changes
+        if (selectedApp!=null){
+//            Log.i("asdfasdf",selectedApp.toString())
+            for (pkg in selectedApp){
+
+                if (arrayListOfApps.get(i).packageName==pkg){
+                    Log.i("asdfasdf",arrayListOfApps.get(i).packageName)
+                    switch.isChecked=true
+                }
+            }
+        }
+
         switch.setOnClickListener(View.OnClickListener {
             if(switch.isChecked){
                 selectedAppsListView.add(arrayListOfApps.get(i).packageName)

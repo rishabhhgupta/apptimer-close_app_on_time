@@ -19,4 +19,15 @@
         <item name="android:colorForeground">#42221f1f
         </item>
     </style>
+
+    <style name="titleFontFamly">
+        <item name="fontFamily">@font/marlin</item>
+        
+    </style>
+
+    <style name="AppTheme.Translucent" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 </resources>
