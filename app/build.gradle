@@ -34,17 +34,16 @@ android {
         targetCompatibility "1.8"
     }
 
-//    compileOptions {
-//        sourceCompatibility kotlin_version
-//        targetCompatibility kotlin_version
-//    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     kotlinOptions {
         jvmTarget = '1.8'
     }
 }
 
 dependencies {
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10"
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
@@ -66,6 +65,8 @@ dependencies {
 
     //switch
     implementation 'com.github.sigma1326:NiceSwitch:1.0'
+
+
 
 
 

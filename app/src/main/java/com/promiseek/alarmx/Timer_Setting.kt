@@ -1,7 +1,11 @@
 package com.promiseek.alarmx
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 
 import android.util.Log
@@ -21,10 +25,12 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.promiseek.alarmx.Database.AlarmsPogo
 import com.promiseek.alarmx.MainActivity.Companion.alarmItemClicked
+import com.promiseek.alarmx.MainActivity.Companion.alarmManager
+
 import com.promiseek.alarmx.MainActivity.Companion.database
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.promiseek.alarmx.MainActivity.Companion.myIntent
+import com.promiseek.alarmx.MainActivity.Companion.pendingIntent
+import kotlinx.coroutines.*
 import java.sql.Time
 
 import java.text.Format
@@ -36,6 +42,7 @@ import kotlin.collections.ArrayList
 class Timer_Setting : AppCompatActivity(){
     var dayPicker: MaterialDayPicker? = null
     var dayTextView:TextView?=null
+    var context:Context = this
 
 
    companion object{
@@ -55,6 +62,62 @@ class Timer_Setting : AppCompatActivity(){
            return displayFormat.format(date)
        }
 
+       suspend fun setNewAlarm(userSetTime:String,selectedDaysArrayList:ArrayList<String>, id:Long?,context: Context){
+
+           var tempId = id
+
+           var alarmCalendar: Calendar =Calendar.getInstance()
+
+           alarmCalendar.set(Calendar.HOUR,Integer.parseInt(
+               (userSetTime)?.split(" ")?.get(0)?.split(":")?.get(0)));
+           alarmCalendar.set(Calendar.MINUTE, Integer.parseInt(
+               (userSetTime)?.split(" ")?.get(0)?.split(":")?.get(1)));
+           alarmCalendar.set(Calendar.SECOND, 0);
+           if (userSetTime != null) {
+               alarmCalendar.set(Calendar.AM_PM,if(userSetTime.split(" ").get(1)=="am")Calendar.AM else Calendar.PM)
+           }
+
+           //alarm fire next day if this condition is not statisfied
+        if (alarmCalendar.before(Calendar.getInstance())) {
+            alarmCalendar.add(Calendar.DATE, 1)
+        }
+
+           if(tempId==null){
+               tempId = database.alarmDao().getLastId()
+           }
+           if(selectedDaysArrayList.get(0)=="Daily"){
+               pendingIntent = PendingIntent.getBroadcast(context,
+                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+               alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
+           }else if(selectedDaysArrayList.get(0)=="Once"){
+               pendingIntent = PendingIntent.getBroadcast(context,
+                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                   alarmManager!!.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
+               }else{
+                   alarmManager!!.setExact(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
+               }
+           }else{
+               for(day in selectedDaysArrayList){
+                   when(day){
+                       "SUNDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,1)
+                       "MONDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,2)
+                       "TUESDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,3)
+                       "WEDNESDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,4)
+                       "THURSDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,5)
+                       "FRIDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,6)
+                       "SATURDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,7)
+                   }
+                   pendingIntent = PendingIntent.getBroadcast(context,
+                       tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                   alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
+
+
+               }
+           }
+
+       }
+
    }
 
 
@@ -71,8 +134,6 @@ class Timer_Setting : AppCompatActivity(){
         dayPicker = findViewById<MaterialDayPicker>(R.id.day_picker)
         //day text view
         dayTextView = findViewById(R.id.dayTextView)
-
-
         var bundle = intent.extras
         var time_picker = findViewById(R.id.timePicker) as TimePicker
 
@@ -163,6 +224,7 @@ class Timer_Setting : AppCompatActivity(){
 
 
                 selectedDaysArrayList.clear()
+
                 val selectedDay = dayPicker!!.selectedDays
                 if(selectedDay.size==0){
                     if(dayTextView!!.text.equals("Custom")){
@@ -180,18 +242,34 @@ class Timer_Setting : AppCompatActivity(){
 
                 if(selectedDaysArrayList.size>0){
 
+
                     if (alarmItemClicked){
                         alarmItemClicked=false
-                        var alarmPogo = AlarmsPogo(id = bundle!!.getLong("id"),time = userSetTime!!, dayChosen = selectedDaysArrayList, packageNames = selectedAppsListView,onOrOf = true)
+                        Log.i("daysosofweek",selectedDaysArrayList.toString())
+                        var alarmPogo = AlarmsPogo(id = bundle!!.getLong("id"),time = userSetTime!!,
+                            dayChosen = selectedDaysArrayList, packageNames = selectedAppsListView,onOrOf = true)
+
                         lifecycleScope.launch(Dispatchers.Default) {
                             database.alarmDao().update(alarmPogo)
+                            setNewAlarm(userSetTime!!,selectedDaysArrayList,
+                                bundle!!.get("id") as Long?
+                            , context)
                         }
+
                     }else{
                         var alarmPogo = AlarmsPogo(id = 0,time = userSetTime!!, dayChosen = selectedDaysArrayList, packageNames = selectedAppsListView,onOrOf = true)
-                        lifecycleScope.launch(Dispatchers.Default) {
+
+                        lifecycleScope.launch(Dispatchers.Default){
                             database.alarmDao().insert(alarmPogo)
+                            setNewAlarm(userSetTime!!,selectedDaysArrayList,null,context)
                         }
+
+
+
                     }
+
+
+
 
 
                     onBackPressed()
@@ -214,8 +292,6 @@ class Timer_Setting : AppCompatActivity(){
         })
 
     }
-
-
 
 
     //bottomShhetDialog

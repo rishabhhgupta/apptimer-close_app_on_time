@@ -17,4 +17,7 @@ interface AlarmDao {
     @Query("Select * from alarms")
     fun getAlarms(): LiveData<List<AlarmsPogo>>
 
+    @Query("Select  id from alarms order by id DESC LIMIT 1")
+    fun getLastId():Long
+
 }

@@ -1,8 +1,10 @@
 package com.promiseek.alarmx
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,13 +20,15 @@ import com.promiseek.alarmx.Database.AlarmsPogo
 import com.promiseek.alarmx.MainActivity.Companion.addTimer
 import com.promiseek.alarmx.MainActivity.Companion.alarmItemClicked
 import com.promiseek.alarmx.MainActivity.Companion.alarmListView
+import com.promiseek.alarmx.MainActivity.Companion.alarmManager
 import com.promiseek.alarmx.MainActivity.Companion.database
+import com.promiseek.alarmx.MainActivity.Companion.myIntent
 import com.promiseek.alarmx.MainActivity.Companion.parentToolbar
+import com.promiseek.alarmx.MainActivity.Companion.pendingIntent
 import com.promiseek.alarmx.MainActivity.Companion.selectedAlams
 import com.promiseek.alarmx.MainActivity.Companion.selectedItems
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.promiseek.alarmx.Timer_Setting.Companion.setNewAlarm
+import kotlinx.coroutines.*
 
 class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var context: Context ): BaseAdapter() {
     override fun getCount(): Int {
@@ -175,18 +179,27 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
         timesRing.text = chooseDayString.substring(0,chooseDayString.lastIndex)
 
         onOrOffSwitch!!.setOnClickListener() {
-            Log.i("heiheh", onOrOffSwitch!!.isChecked.toString())
-
-            val alarmPogo = AlarmsPogo(id = arrayListOfAlarms.get(i).id
-                ,time = arrayListOfAlarms.get(i).time,
-                dayChosen = arrayListOfAlarms.get(i).dayChosen,
-                packageNames = arrayListOfAlarms.get(i).packageNames,
-                onOrOf =onOrOffSwitch!!.isChecked)
-
 
                 CoroutineScope(Dispatchers.Default).launch() {
+                    val alarmPogo = AlarmsPogo(id = arrayListOfAlarms.get(i).id
+                        ,time = arrayListOfAlarms.get(i).time,
+                        dayChosen = arrayListOfAlarms.get(i).dayChosen,
+                        packageNames = arrayListOfAlarms.get(i).packageNames,
+                        onOrOf =onOrOffSwitch.isChecked)
                     database.alarmDao().update(alarmPogo)
+                    if(!onOrOffSwitch.isChecked){
+                        pendingIntent  = PendingIntent.getBroadcast(context,
+                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager!!.cancel(pendingIntent)
+                    }else{
+                        GlobalScope.launch(Dispatchers.Default){
+                            setNewAlarm(userSetTime = arrayListOfAlarms.get(i).time, selectedDaysArrayList = arrayListOfAlarms.get(i).dayChosen,
+                                id = arrayListOfAlarms.get(i).id,context)
+                        }
+                    }
+
                 }
+
         }
 
 
@@ -197,8 +210,11 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
                             arrayListOfAlarms.filter {
                                 it!=j
                             }
-
+                            pendingIntent  = PendingIntent.getBroadcast(context,
+                                j.id.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            alarmManager!!.cancel(pendingIntent)
                             database.alarmDao().delete(j)
+
                         }
 
                     }
