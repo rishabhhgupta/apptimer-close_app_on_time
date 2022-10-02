@@ -178,9 +178,9 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
         }
         timesRing.text = chooseDayString.substring(0,chooseDayString.lastIndex)
 
-        onOrOffSwitch!!.setOnClickListener() {
+        onOrOffSwitch.setOnClickListener() {
 
-                CoroutineScope(Dispatchers.Default).launch() {
+                GlobalScope.launch(Dispatchers.Default) {
                     val alarmPogo = AlarmsPogo(id = arrayListOfAlarms.get(i).id
                         ,time = arrayListOfAlarms.get(i).time,
                         dayChosen = arrayListOfAlarms.get(i).dayChosen,
@@ -188,13 +188,14 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
                         onOrOf =onOrOffSwitch.isChecked)
                     database.alarmDao().update(alarmPogo)
                     if(!onOrOffSwitch.isChecked){
+
                         pendingIntent  = PendingIntent.getBroadcast(context,
                             arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                         alarmManager!!.cancel(pendingIntent)
                     }else{
-                        GlobalScope.launch(Dispatchers.Default){
+                        launch(Dispatchers.Default){
                             setNewAlarm(userSetTime = arrayListOfAlarms.get(i).time, selectedDaysArrayList = arrayListOfAlarms.get(i).dayChosen,
-                                id = arrayListOfAlarms.get(i).id,context)
+                                id = arrayListOfAlarms.get(i).id,context,arrayListOfAlarms.get(i).packageNames)
                         }
                     }
 

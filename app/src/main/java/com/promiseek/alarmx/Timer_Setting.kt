@@ -62,7 +62,7 @@ class Timer_Setting : AppCompatActivity(){
            return displayFormat.format(date)
        }
 
-       suspend fun setNewAlarm(userSetTime:String,selectedDaysArrayList:ArrayList<String>, id:Long?,context: Context){
+       suspend fun setNewAlarm(userSetTime:String,selectedDaysArrayList:ArrayList<String>, id:Long?,context: Context,selectedApps:ArrayList<String>){
 
            var tempId = id
 
@@ -76,6 +76,7 @@ class Timer_Setting : AppCompatActivity(){
            if (userSetTime != null) {
                alarmCalendar.set(Calendar.AM_PM,if(userSetTime.split(" ").get(1)=="am")Calendar.AM else Calendar.PM)
            }
+           myIntent.putStringArrayListExtra("selectedApps",selectedApps)
 
            //alarm fire next day if this condition is not statisfied
         if (alarmCalendar.before(Calendar.getInstance())) {
@@ -88,6 +89,7 @@ class Timer_Setting : AppCompatActivity(){
            if(selectedDaysArrayList.get(0)=="Daily"){
                pendingIntent = PendingIntent.getBroadcast(context,
                    tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
                alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
            }else if(selectedDaysArrayList.get(0)=="Once"){
                pendingIntent = PendingIntent.getBroadcast(context,
@@ -248,12 +250,13 @@ class Timer_Setting : AppCompatActivity(){
                         Log.i("daysosofweek",selectedDaysArrayList.toString())
                         var alarmPogo = AlarmsPogo(id = bundle!!.getLong("id"),time = userSetTime!!,
                             dayChosen = selectedDaysArrayList, packageNames = selectedAppsListView,onOrOf = true)
+                        Log.i("selectedAppsListView", selectedAppsListView.toString())
 
                         lifecycleScope.launch(Dispatchers.Default) {
                             database.alarmDao().update(alarmPogo)
                             setNewAlarm(userSetTime!!,selectedDaysArrayList,
                                 bundle!!.get("id") as Long?
-                            , context)
+                            , context, selectedAppsListView)
                         }
 
                     }else{
@@ -261,7 +264,8 @@ class Timer_Setting : AppCompatActivity(){
 
                         lifecycleScope.launch(Dispatchers.Default){
                             database.alarmDao().insert(alarmPogo)
-                            setNewAlarm(userSetTime!!,selectedDaysArrayList,null,context)
+                            setNewAlarm(userSetTime!!,selectedDaysArrayList,null,context,
+                                selectedAppsListView)
                         }
 
 
