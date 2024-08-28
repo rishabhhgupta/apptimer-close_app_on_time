@@ -3,10 +3,13 @@ package com.promiseek.alarmx
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 
 import android.util.Log
 import android.view.View
@@ -16,6 +19,7 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -65,6 +69,10 @@ class Timer_Setting : AppCompatActivity(){
 
        suspend fun setNewAlarm(userSetTime:String,selectedDaysArrayList:ArrayList<String>, id:Long?,context: Context,selectedApps:ArrayList<String>){
 
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+               requestExactAlarmPermission(context)
+           }
+
            var tempId = id
 
            var alarmCalendar: Calendar =Calendar.getInstance()
@@ -91,20 +99,24 @@ class Timer_Setting : AppCompatActivity(){
 //               pendingIntent = PendingIntent.getBroadcast(context,
 //                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                pendingIntent = PendingIntent.getBroadcast(context,
-                   tempId.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
+                   tempId.toInt(), myIntent, PendingIntent.FLAG_MUTABLE);
 
                alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
            }else if(selectedDaysArrayList.get(0)=="Once"){
-//               pendingIntent = PendingIntent.getBroadcast(context,
-//                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
                pendingIntent = PendingIntent.getBroadcast(context,
-                   tempId.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
+                   tempId.toInt(), myIntent, PendingIntent.FLAG_MUTABLE);
+
 
                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                   alarmManager!!.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
-               }else{
-                   alarmManager!!.setExact(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
+                   alarmManager?.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
+               } else {
+                   alarmManager?.setExact(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
                }
+
+               alarmManager?.setExact(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent);
+
+
            }else{
                for(day in selectedDaysArrayList){
                    when(day){
@@ -119,7 +131,7 @@ class Timer_Setting : AppCompatActivity(){
 //                   pendingIntent = PendingIntent.getBroadcast(context,
 //                       tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                    pendingIntent = PendingIntent.getBroadcast(context,
-                       tempId.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
+                       tempId.toInt(), myIntent, PendingIntent.FLAG_MUTABLE);
                    alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
 
 
@@ -128,7 +140,26 @@ class Timer_Setting : AppCompatActivity(){
 
        }
 
+       @RequiresApi(Build.VERSION_CODES.S)
+       fun requestExactAlarmPermission(context: Context) {
+           val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+
+           if (!alarmManager.canScheduleExactAlarms()) {
+               // The app doesn't have the permission, guide the user to grant it
+//               Toast.makeText(context, "Permission required to set exact alarms", Toast.LENGTH_SHORT).show()
+
+               // Open the settings page where the user can grant the permission
+               val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+               intent.data = Uri.parse("package:${context.packageName}")
+               context.startActivity(intent)
+           } else {
+               // The permission is already granted
+//               Toast.makeText(context, "Exact alarm permission is already granted", Toast.LENGTH_SHORT).show()
+           }
+       }
    }
+
 
 
 

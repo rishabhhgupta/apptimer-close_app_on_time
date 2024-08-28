@@ -21,6 +21,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.app.AlarmManager
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.ContextCompat.getSystemServiceName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -105,7 +108,26 @@ class MainActivity : AppCompatActivity() {
             }
             notificationManager.notify(1234, builder.build())
         }
+         fun createNotification(activity: Activity): Notification {
+            // Create a notification channel for Android O and above
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channelId = activity.getString(R.string.channelId)
+                val channelName = "Alarm Service Channel"
+                val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+                val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.createNotificationChannel(channel)
+            }
 
+            // Build the notification
+            val builder = NotificationCompat.Builder(activity, "alarm_service_channel")
+                .setContentTitle("Alarm Service Running")
+                .setContentText("Your alarm service is active.")
+                .setSmallIcon(R.mipmap.ic_launcher) // Replace with your app's icon
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOngoing(true) // Makes the notification ongoing
+
+            return builder.build()
+        }
     }
 
 
@@ -123,8 +145,6 @@ class MainActivity : AppCompatActivity() {
         addTimer = findViewById(R.id.addTimer) as ImageView
         addTimer.setOnClickListener(View.OnClickListener {
             startActivity(Intent(applicationContext,Timer_Setting::class.java))
-
-
         })
 
         database = AlarmDatabase.getDatabase(this)

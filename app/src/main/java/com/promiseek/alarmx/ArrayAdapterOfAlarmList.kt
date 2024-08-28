@@ -192,7 +192,7 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
 //                        pendingIntent  = PendingIntent.getBroadcast(context,
 //                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                         pendingIntent  = PendingIntent.getBroadcast(context,
-                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
+                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_MUTABLE);
                         alarmManager!!.cancel(pendingIntent)
                     }else{
                         launch(Dispatchers.Default){
