@@ -101,7 +101,7 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
             parentToolbar.setNavigationIcon(context.resources.getDrawable(R.drawable.cross))
             MainActivity.selectAll.setVisible(true)
             selectedAlams.add(arrayListOfAlarms.get(i))
-            addTimer.setImageDrawable(context.resources.getDrawable(R.drawable.dlt))
+            addTimer.setImageDrawable(context.resources.getDrawable(R.drawable.plus)) //here have dlt
 
             alarmListView.adapter = ArrayAdapterOfAlarmList(arrayListOfAlarms,context)
 
@@ -189,8 +189,10 @@ class ArrayAdapterOfAlarmList(var arrayListOfAlarms: List<AlarmsPogo>, var conte
                     database.alarmDao().update(alarmPogo)
                     if(!onOrOffSwitch.isChecked){
 
+//                        pendingIntent  = PendingIntent.getBroadcast(context,
+//                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                         pendingIntent  = PendingIntent.getBroadcast(context,
-                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            arrayListOfAlarms.get(i).id.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
                         alarmManager!!.cancel(pendingIntent)
                     }else{
                         launch(Dispatchers.Default){

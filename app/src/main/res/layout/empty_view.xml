@@ -7,8 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TAP + To Set Timer To \n
-        Stop App"
+        android:text="TAP + To Set Timer To Stop App"
         android:textAlignment="center"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"

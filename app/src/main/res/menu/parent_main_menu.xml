@@ -4,7 +4,8 @@
 
     <item
         android:id="@+id/selectAll"
-        android:icon="@drawable/select_all"
+        android:icon="@drawable/cross"
+
         app:showAsAction="ifRoom"
 
         android:title="">

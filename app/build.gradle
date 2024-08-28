@@ -5,6 +5,7 @@ plugins {
 
 
 }
+
 apply plugin: 'kotlin-kapt'
 
 
@@ -13,9 +14,10 @@ android {
     buildToolsVersion "30.0.3"
 
 
+
     defaultConfig {
         applicationId "com.promiseek.alarmx"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
@@ -45,7 +47,7 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10"
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -53,7 +55,8 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    implementation 'ca.antonious:materialdaypicker:0.7.4'
+//    implementation 'ca.antonious:materialdaypicker:0.7.4'
+    implementation project(":lib")
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
 
 

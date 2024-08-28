@@ -1,2 +1,3 @@
 rootProject.name = "AlarmX"
 include ':app'
+include ':lib'

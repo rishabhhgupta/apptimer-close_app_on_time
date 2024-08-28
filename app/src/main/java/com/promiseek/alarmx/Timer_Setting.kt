@@ -21,6 +21,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import ca.antonious.materialdaypicker.MaterialDayPicker
+
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.promiseek.alarmx.Database.AlarmsPogo
@@ -87,13 +88,18 @@ class Timer_Setting : AppCompatActivity(){
                tempId = database.alarmDao().getLastId()
            }
            if(selectedDaysArrayList.get(0)=="Daily"){
+//               pendingIntent = PendingIntent.getBroadcast(context,
+//                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                pendingIntent = PendingIntent.getBroadcast(context,
-                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                   tempId.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
 
                alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
            }else if(selectedDaysArrayList.get(0)=="Once"){
+//               pendingIntent = PendingIntent.getBroadcast(context,
+//                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                pendingIntent = PendingIntent.getBroadcast(context,
-                   tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                   tempId.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
+
                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                    alarmManager!!.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
                }else{
@@ -110,8 +116,10 @@ class Timer_Setting : AppCompatActivity(){
                        "FRIDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,6)
                        "SATURDAY" -> alarmCalendar.set(Calendar.DAY_OF_WEEK,7)
                    }
+//                   pendingIntent = PendingIntent.getBroadcast(context,
+//                       tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                    pendingIntent = PendingIntent.getBroadcast(context,
-                       tempId.toInt(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                       tempId.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE);
                    alarmManager!!.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis,24*60*60*1000, pendingIntent);
 
 
